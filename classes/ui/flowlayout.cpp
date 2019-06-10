@@ -3,15 +3,19 @@
 
 #include "flowlayout.h"
 FlowLayout::FlowLayout(QWidget *parent, int margin, int hSpacing, int vSpacing)
-	: QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing)
+: QLayout(parent), m_hSpace(hSpacing), m_vSpace(vSpacing)
 {
 	setContentsMargins(margin, margin, margin, margin);
+	setAlignment (Qt::AlignHCenter);
+
 }
 
 FlowLayout::FlowLayout(int margin, int hSpacing, int vSpacing)
-	: m_hSpace(hSpacing), m_vSpace(vSpacing)
+: m_hSpace(hSpacing), m_vSpace(vSpacing)
 {
 	setContentsMargins(margin, margin, margin, margin);
+	setAlignment (Qt::AlignHCenter);
+
 }
 
 FlowLayout::~FlowLayout()
@@ -120,11 +124,11 @@ int FlowLayout::doLayout(const QRect &rect, bool testOnly) const
 		int spaceX = horizontalSpacing();
 		if (spaceX == -1)
 			spaceX = wid->style()->layoutSpacing(
-				QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
+			QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Horizontal);
 		int spaceY = verticalSpacing();
 		if (spaceY == -1)
 			spaceY = wid->style()->layoutSpacing(
-				QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
+			QSizePolicy::PushButton, QSizePolicy::PushButton, Qt::Vertical);
 		int nextX = x + item->sizeHint().width() + spaceX;
 		if (nextX - spaceX > effectiveRect.right() && lineHeight > 0) {
 			x = effectiveRect.x();
@@ -144,6 +148,7 @@ int FlowLayout::doLayout(const QRect &rect, bool testOnly) const
 int FlowLayout::smartSpacing(QStyle::PixelMetric pm) const
 {
 	QObject *parent = this->parent();
+
 	if (!parent) {
 		return -1;
 	} else if (parent->isWidgetType()) {

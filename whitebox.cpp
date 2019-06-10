@@ -1,7 +1,7 @@
-#include "wb.h"
-#include "ui_wb.h"
-#include "sw.h"
-#include "tw.h"
+#include "whitebox.h"
+#include "ui_whitebox.h"
+#include "settingswindow.h"
+#include "toolswindow.h"
 #include <QDirIterator>
 #include <QResizeEvent>
 #include <QScrollArea>
@@ -28,13 +28,14 @@
 #include <classes/ui/show_widget.h>
 #include <classes/ui/episode_widget.h>
 #include <classes/ui/player_playlist.h>
+#include <classes/process/settings.h>
 
-
-wb::wb(QWidget *parent) :
-	QMainWindow(parent),
-	ui(new Ui::wb)
+whiteBox::whiteBox(QWidget *parent) :
+QMainWindow(parent),
+ui(new Ui::wb)
 {
 	ui->setupUi(this);
+
 	databasehandler::initdb();
 	on_actionRefresh_triggered();
 
@@ -42,10 +43,10 @@ wb::wb(QWidget *parent) :
 	this->setMinimumHeight(200);
 	ui->c_showdata->setMaximumHeight(0);
 
-	int state = loadsettings("auto","0").toInt();
+	int state = settings::load_setting("auto","0").toInt();
 	if(state){
 		if(toolswindow == nullptr){
-			toolswindow = new tw;
+			toolswindow = new toolsWindow;
 		}
 		if(toolswindow->isVisible())
 			toolswindow->hide();
@@ -54,106 +55,119 @@ wb::wb(QWidget *parent) :
 	}
 
 	connect(&file_handle_watcher, SIGNAL(finished()), this, SLOT(file_handle_found()));
-	file_handle_future = QtConcurrent::run(wb::file_handle_memory);
+	file_handle_future = QtConcurrent::run(whiteBox::file_handle_memory);
 	file_handle_watcher.setFuture(file_handle_future);
+
 }
 
-wb::~wb()
+whiteBox::~whiteBox()
 {
 	delete ui;
 }
 
-void wb::closeEvent (QCloseEvent *event){
+void whiteBox::closeEvent (QCloseEvent *event){
 	delete settingswindow;
 	delete toolswindow;
 	delete playerwindow;
 }
 
-QString wb::file_handle_memory(){
+QString whiteBox::file_handle_memory(){
 	QString read = "";
 	linked_mem_buffer mem(linked_mem_buffer::SINGLE_INSTANCE,false);
-	if(mem.exists())
+	/**
+
+	  this was going to be in an infinite loop until it found something, but ::run can't be cancelled
+	  this meant that the program continued to while(1) forever even after the program was 'exited'
+	  so, doing an infinite quick loop allows it to break much quicker
+
+	  */
+
+	Sleep(125); //to lighten the load a little, so its not calling it potentially thousands of times per second
+	if(mem.exists()){
 		mem.attach();
-	while(1){
 		read = mem.read();
-		if(read != ""){
-			mem.clear();
-			return read;
-		}
+	}
+	mem.close();
+	return read;
+}
+
+void whiteBox::file_handle_found(){
+	QString result = file_handle_watcher.result();
+	file_handle_future = QtConcurrent::run(whiteBox::file_handle_memory);
+	file_handle_watcher.setFuture(file_handle_future);
+	if(result != ""){
+		qDebug() << result << endl;
+		set_file_open_handle(result);
 	}
 }
 
-void wb::file_handle_found(){
-	QString result = file_handle_watcher.result();
-	file_handle_future = QtConcurrent::run(wb::file_handle_memory);
-	file_handle_watcher.setFuture(file_handle_future);
-	set_file_open_handle(result);
-}
-
-void wb::set_file_open_handle(QString file){
+void whiteBox::set_file_open_handle(QString file){
 	QString path = file;
 	QFile mediafile(path);
-	if(!mediafile.exists()){
+	QFileInfo filedata(path);
 
+	if(!mediafile.exists() || (filedata.suffix() != "mkv" && filedata.suffix() != "mp4" && filedata.suffix() != "mov" && filedata.suffix() != "avi")){
 		QString message = path + " not found. Episode could not be added.";
 		QMessageBox::critical(
-					this,
-					tr("WhiteBox"),
-					tr(message.toStdString().c_str()));
+		this,
+		tr("WhiteBox"),
+		tr(message.toStdString().c_str()));
 		return;
 	}
 
 	QString show;
 	int season;
 	int episode;
-	extract_episode_details(path,show,season,episode);
+	if(extract_episode_details(path,show,season,episode)){
 
-	QString query = "Select * from shows where path = '" + path + "'";
-	QSqlQuery result = databasehandler::execquery(query);
-	if (!result.isValid()){
+		QString query = "Select * from shows where path = '" + path + "'";
+		QSqlQuery result = databasehandler::execquery(query);
+		if (!result.isValid()){
 
-		QJsonObject object;
+			QJsonObject object;
 
-		object["path"] = path;
-		object["lastwatch"] = NULL;
-		object["playcount"] = 0;
-		object["showname"] = show;
-		object["season"] = season;
-		object["episode"] = episode;
+			object["path"] = path;
+			object["lastwatch"] = NULL;
+			object["playcount"] = 0;
+			object["showname"] = show;
+			object["season"] = season;
+			object["episode"] = episode;
 
-		databasehandler::insertdata("shows", object);
-		//this may produce an sql error if the episode already exists (show/season/episode composite key violation),
-		//but it doesn't matter - if the path doesn't exist, we should try anyway
+			databasehandler::insertdata("shows", object);
+			//this may produce an sql error if the episode already exists (show/season/episode composite key violation),
+			//but it doesn't matter - if the path doesn't exist, we should try anyway
 
+		}
+
+		if(playerwindow == nullptr){
+			playerwindow= new playbackWindow;
+		}
+
+		if(playerwindow->isHidden()){
+			delete playerwindow;
+			playerwindow = new playbackWindow;
+		}
+
+		playerwindow->show();
+
+		playerwindow->external_url_add(path);
 	}
-
-	if(playerwindow == nullptr){
-		playerwindow= new pb;
-	}
-
-	if(playerwindow->isHidden()){
-		delete playerwindow;
-		playerwindow = new pb;
-	}
-	playerwindow->show();
-
-	playerwindow->player_url_add(path);
 }
 
-void wb::on_actionTools_triggered()
+void whiteBox::on_actionTools_triggered()
 {
 	if(toolswindow == nullptr){
-		toolswindow = new tw;
+		toolswindow = new toolsWindow;
 		toolswindow->show();
 	} else {
 		toolswindow->show();
 	}
 }
 
-void wb::on_actionsettings_triggered()
+void whiteBox::on_actionsettings_triggered()
 {
 	if(settingswindow == nullptr){
-		settingswindow = new sw;
+		settingswindow = new settingsWindow;
 		settingswindow->show();
 	} else {
 		settingswindow->show();
@@ -161,7 +175,7 @@ void wb::on_actionsettings_triggered()
 }
 
 
-void wb::episode_play(){
+void whiteBox::episode_play(){
 	QObject* sender = QObject::sender();
 
 	QPushButton* button = qobject_cast<QPushButton*>(sender);
@@ -171,22 +185,21 @@ void wb::episode_play(){
 	QFile mediafile(path);
 
 	if(!mediafile.exists()){
-
 		QString message = path + " not found. Episode could not be played.";
 		QMessageBox::critical(
-					this,
-					tr("WhiteBox"),
-					tr(message.toStdString().c_str()));
+		this,
+		tr("WhiteBox"),
+		tr(message.toStdString().c_str()));
 		return;
 	}
 
 	if(playerwindow == nullptr){
-		playerwindow= new pb;
+		playerwindow= new playbackWindow;
 	}
 
 	if(playerwindow->isHidden()){
 		delete playerwindow;
-		playerwindow = new pb;
+		playerwindow = new playbackWindow;
 	}
 
 	playerwindow->show();
@@ -194,61 +207,41 @@ void wb::episode_play(){
 
 }
 
-void wb::playlist_add(){
+void whiteBox::playlist_add(){
+
 	QObject* sender = QObject::sender();
 
 	QPushButton* button = qobject_cast<QPushButton*>(sender);
 	QString path = button->property("path").toString();
 
 	QFile mediafile(path);
-	if(!mediafile.exists()){
 
+	if(!mediafile.exists()){
 		QString message = path + " not found. Episode could not be added.";
 		QMessageBox::critical(
-					this,
-					tr("WhiteBox"),
-					tr(message.toStdString().c_str()));
+		this,
+		tr("WhiteBox"),
+		tr(message.toStdString().c_str()));
 		return;
 	}
 
 
 	if(playerwindow == nullptr){
-		playerwindow= new pb;
+		playerwindow= new playbackWindow;
 	}
 
 	if(playerwindow->isHidden()){
 		delete playerwindow;
-		playerwindow = new pb;
+		playerwindow = new playbackWindow;
 	}
 	playerwindow->show();
 
-	playerwindow->player_url_add(path);
+	playerwindow->external_url_add(path);
 
 }
 
 
-void wb::savesettings(QString key, QString value) {
-	QCoreApplication::setOrganizationName("Walkersoft");
-	QCoreApplication::setApplicationName("whitebox");
-	QSettings settings("settings.ini",QSettings::IniFormat);
-	settings.setValue(key, value);
-}
-
-void wb::savesettings(QString key, int value) {
-	QCoreApplication::setOrganizationName("Walkersoft");
-	QCoreApplication::setApplicationName("whitebox");
-	QSettings settings("settings.ini",QSettings::IniFormat);
-	settings.setValue(key, value);
-}
-
-QString wb::loadsettings(QString key, QString defaultval) {
-	QCoreApplication::setOrganizationName("Walkersoft");
-	QCoreApplication::setApplicationName("whitebox");
-	QSettings settings("settings.ini",QSettings::IniFormat);
-	return settings.value(key, defaultval).toString();
-}
-
-void wb::clearlayout(QLayout* layout){
+void whiteBox::clearlayout(QLayout* layout){
 	if ( layout != nullptr )
 	{
 		QLayoutItem* item;
@@ -261,7 +254,7 @@ void wb::clearlayout(QLayout* layout){
 
 }
 
-void wb::deleteLayoutContents(QLayout* layout){
+void whiteBox::deleteLayoutContents(QLayout* layout){
 	if ( layout != nullptr )
 	{
 		QLayoutItem* item;
@@ -273,7 +266,7 @@ void wb::deleteLayoutContents(QLayout* layout){
 	}
 }
 
-void wb::ui_name_clicked(){
+void whiteBox::ui_name_clicked(){
 
 	deleteLayoutContents(ui->c_seasonlist);
 
@@ -334,30 +327,34 @@ void wb::ui_name_clicked(){
 	backgroundgrid->setAlignment(Qt::AlignHCenter);
 }
 
-void wb::show_play_resume(){
+void whiteBox::show_play_resume(){
 	QObject* sender = QObject::sender();
 
 	QString showname = sender->property("showname").toString();
 	if(playerwindow == nullptr){
-		playerwindow= new pb;
+		playerwindow= new playbackWindow;
 	}
 
 	if(playerwindow->isHidden()){
 		delete playerwindow;
-		playerwindow = new pb;
+		playerwindow = new playbackWindow;
 	}
 
 	playerwindow->show();
 
 	playerwindow->playlist->clear();
-	QString query = "select `path` from watchhistory where `path` in (select `path` from shows where `showname`= '"+showname+"') order by `when` desc limit 1";
+	QString query = "select * from watchhistory where `showname`='"+showname+"' order by `when` desc limit 1";
 
 	QSqlQuery result = databasehandler::execquery(query);
+	QString season,episode,sname;
+	if (result.isValid()){
+		season = result.value("season").toString();
+		episode = result.value("episode").toString();
+		sname = result.value("showname").toString();
+	}
 
-	QString mostrecent = result.value("path").toString();
 
-	QString query2 = "select * from shows where path = '"+mostrecent+"'";
-
+	QString query2 = "select * from shows where showname = '"+sname+"' and episode = "+episode +" and season = "+season;
 	result = databasehandler::execquery(query2);
 	int escore =0;
 
@@ -377,7 +374,7 @@ void wb::show_play_resume(){
 		do {
 			int cscore = result.value("episode").toInt() + (result.value("season").toInt()*10);
 			if (cscore >= escore){
-				playerwindow->player_url_add(result.value("path").toString());
+				playerwindow->external_url_add(result.value("path").toString());
 			}
 		} while (result.next());
 	}
@@ -385,18 +382,18 @@ void wb::show_play_resume(){
 	playerwindow->player->play();
 }
 
-void wb::show_play_restart(){
+void whiteBox::show_play_restart(){
 
 	QObject* sender = QObject::sender();
 	QString showname = sender->property("showname").toString();
 
 	if(playerwindow == nullptr){
-		playerwindow= new pb;
+		playerwindow= new playbackWindow;
 	}
 
 	if(playerwindow->isHidden()){
 		delete playerwindow;
-		playerwindow = new pb;
+		playerwindow = new playbackWindow;
 	}
 
 	playerwindow->show();
@@ -406,13 +403,13 @@ void wb::show_play_restart(){
 	QSqlQuery result = databasehandler::execquery(query);
 
 	do {
-		playerwindow->player_url_add(result.value("path").toString());
+		playerwindow->external_url_add(result.value("path").toString());
 
 	} while (result.next());
 
 }
 
-void wb::box_change(int index){
+void whiteBox::box_change(int index){
 
 	deleteLayoutContents(ui->d_episodelist);
 	QObject* sender = QObject::sender();
@@ -435,8 +432,8 @@ void wb::box_change(int index){
 
 	QPushButton* leftscroll = new QPushButton;
 	QPushButton* rightscroll = new QPushButton;
-	leftscroll->setMaximumHeight(110);
-	rightscroll->setMaximumHeight(110);
+	leftscroll->setFixedHeight(110);
+	rightscroll->setFixedHeight(110);
 
 
 	leftscroll->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Expanding);
@@ -445,7 +442,8 @@ void wb::box_change(int index){
 	rightscroll->setObjectName("right");
 	connect(leftscroll, SIGNAL(clicked(bool)), this, SLOT(move_episode_scroll()));
 	connect(rightscroll, SIGNAL(clicked(bool)), this, SLOT(move_episode_scroll()));
-
+	//	scrollarea->setStyleSheet("background-color:blue");
+	//	scrollarea->setFixedHeight(90);
 	do{
 
 		int episode = result.value("episode").toInt();
@@ -460,6 +458,7 @@ void wb::box_change(int index){
 		connect(episodeitem->playlist_add, SIGNAL(clicked(bool)), this, SLOT(playlist_add()));
 
 		episodegrid->addWidget(episodeitem,0,i);
+
 		i++;
 
 	} while(result.next());
@@ -467,7 +466,7 @@ void wb::box_change(int index){
 	episodegrid->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
 	scrollarea->setWidget(basewidget);
-	scrollarea->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+	scrollarea->setAlignment(Qt::AlignHCenter);
 	scrollarea->QAbstractScrollArea::setVerticalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 	scrollarea->QAbstractScrollArea::setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
 	scrollarea->setFixedHeight(125);
@@ -475,9 +474,11 @@ void wb::box_change(int index){
 	scrollarea->verticalScrollBar()->setEnabled(false);
 	ui->d_episodelist->addWidget(leftscroll,2,0);
 	ui->d_episodelist->addWidget(scrollarea,2,1);
-	ui->d_episodelist->addWidget(rightscroll,2,2);
-	ui->d_episodelist->setSpacing(0);
+	ui->d_episodelist->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
+	ui->d_episodelist->addWidget(rightscroll,2,2);
+
+	ui->d_episodelist->setSpacing(0);
 	if(ui->c_showdata->maximumHeight() < 185){
 		QPropertyAnimation *animation = new QPropertyAnimation(ui->c_showdata, "maximumHeight");
 		animation->setDuration(150);
@@ -489,7 +490,7 @@ void wb::box_change(int index){
 
 }
 
-void wb::move_episode_scroll(){
+void whiteBox::move_episode_scroll(){
 	QObject* sender = QObject::sender();
 
 	if(sender->objectName() == "left"){
@@ -503,7 +504,7 @@ void wb::move_episode_scroll(){
 }
 
 
-bool wb::extract_episode_details(QString showpath, QString &showname, int &season, int &episode){
+bool whiteBox::extract_episode_details(QString showpath, QString &showname, int &season, int &episode){
 
 	/// this function pulls the show name, season number and episode number from the path provided
 	///
@@ -520,9 +521,32 @@ bool wb::extract_episode_details(QString showpath, QString &showname, int &seaso
 	QFileInfo fileinfo(file.fileName());
 
 
-	if(fileinfo.suffix()=="nfo" || fileinfo.suffix()=="txt" || fileinfo.suffix() == "rar" || fileinfo.suffix() == ""){
+	if (
+	fileinfo.suffix() == "nfo"	||
+	fileinfo.suffix() == "txt"	||
+	fileinfo.suffix() == "rar"	||
+	fileinfo.suffix() == ""
+	)
 		return false;
-	}
+
+
+
+	if (
+	fileinfo.suffix() != "webm"	&&
+	fileinfo.suffix() != "mkv"	&&
+	fileinfo.suffix() != "avi"	&&
+	fileinfo.suffix() != "amv"	&&
+	fileinfo.suffix() != "mpg"	&&
+	fileinfo.suffix() != "mpeg"	&&
+	fileinfo.suffix() != "m4v"	&&
+	fileinfo.suffix() != "mp4"	&&
+	fileinfo.suffix() != "mov"	&&
+	fileinfo.suffix() != "qt"	&&
+	fileinfo.suffix() != "gifv"	&&
+	fileinfo.suffix() != "mp4"
+	)
+		return false;
+
 
 	std::regex rgx("((([A-z]+[\\.|\\s|_])+)+([sS][\\d]+[eE][\\d]+))"); //arrow.s01e07
 	std::regex rgx2("((([A-z]+[\\.|\\s|_])+[0-9]+[\\.|\\s|_])+([sS][\\d]+[eE][\\d]+))"); //the.100.s01e02
@@ -544,9 +568,9 @@ bool wb::extract_episode_details(QString showpath, QString &showname, int &seaso
 
 	//arrow.s01e07.mkv
 	if(
-			std::regex_search(filename, match, rgx) ||
-			std::regex_search(filename, match, rgx2)
-			){
+	std::regex_search(filename, match, rgx) ||
+	std::regex_search(filename, match, rgx2)
+	){
 
 		std::string stringmatch = match[0];
 		QString qmatch = QString::fromStdString(stringmatch);
@@ -556,8 +580,8 @@ bool wb::extract_episode_details(QString showpath, QString &showname, int &seaso
 
 
 		if(
-				std::regex_search(stringmatch, seasonepisodematch, rgx_seas_ep)
-				){
+		std::regex_search(stringmatch, seasonepisodematch, rgx_seas_ep)
+		){
 			std::string stringmatch = seasonepisodematch[0];
 
 			if (std::regex_search(stringmatch, seasonmatch, rgx_seas) && std::regex_search(stringmatch, episodematch, rgx_ep)){
@@ -573,6 +597,8 @@ bool wb::extract_episode_details(QString showpath, QString &showname, int &seaso
 				if (std::regex_search(filename, shownamematch, nameregex)){
 					showname = QString::fromStdString(shownamematch[0]);
 					showname.replace(".", " ");
+					showname = toCamelCase(showname);
+
 				}
 
 				if (std::regex_search(seasonstring, seasonsubstring, rgx_num) && std::regex_search(episodestring, episodesubstring, rgx_num)){
@@ -596,9 +622,9 @@ bool wb::extract_episode_details(QString showpath, QString &showname, int &seaso
 	/// NOT SURE. NEEDS TO  RENAME THE FILE AND DO THE FIRST SECTION
 	//arrow.s01e07/arrow.107.mkv (path has correct regex, filename doesnt)
 	if (
-			std::regex_search(filepath, match, rgx) ||
-			std::regex_search(filepath, match, rgx2)
-			){
+	std::regex_search(filepath, match, rgx) ||
+	std::regex_search(filepath, match, rgx2)
+	){
 
 		std::string stringmatch = match[0];
 		QString qmatch = QString::fromStdString(stringmatch);
@@ -629,7 +655,7 @@ bool wb::extract_episode_details(QString showpath, QString &showname, int &seaso
 
 
 
-void wb::on_actionRefresh_triggered()
+void whiteBox::on_actionRefresh_triggered()
 {
 
 	delete showslist;
@@ -694,7 +720,7 @@ void wb::on_actionRefresh_triggered()
 
 }
 
-void wb::on_search_textChanged(const QString &arg1){
+void whiteBox::on_search_textChanged(const QString &arg1){
 
 	for(QObject* child :show_base_widget->children()){
 
@@ -711,4 +737,13 @@ void wb::on_search_textChanged(const QString &arg1){
 				qw->show();
 		}
 	}
+}
+
+QString whiteBox::toCamelCase(const QString& s)
+{
+	QStringList parts = s.split(' ', QString::SkipEmptyParts);
+	for (int i = 0; i < parts.size(); ++i)
+		parts[i].replace(0, 1, parts[i][0].toUpper());
+
+	return parts.join(" ");
 }

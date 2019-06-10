@@ -26,6 +26,8 @@ public:
 
 	bool create();
 
+	void close();
+
 private:
 	QSharedMemory* sharedMemory;
 

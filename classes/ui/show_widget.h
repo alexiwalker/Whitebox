@@ -19,6 +19,7 @@ public:
 	QGridLayout* layout;
 	QGridLayout* layout2;
 	QWidget* innerwidget;
+	QWidget* showbanner;
 	QLabel* mainlabel;
 	QPushButton* restart;
 	QPushButton* resume;

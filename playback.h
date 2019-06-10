@@ -19,22 +19,19 @@ namespace Ui {
 	class pb;
 }
 
-class pb : public QMainWindow
+class playbackWindow : public QMainWindow
 {
 		Q_OBJECT
 
 	public:
-		explicit pb(QWidget *parent = nullptr);
-		~pb();
+		explicit playbackWindow(QWidget *parent = nullptr);
+		~playbackWindow();
 		QMediaPlayer* player;
 		QMediaPlaylist* playlist;
 		QVideoWidget*  videowidget;
 
 		void player_url_play(QString path);
-		void player_url_add(QString path);
-
-
-
+		void external_url_add(QString path);
 
 		void window_close();
 
@@ -61,20 +58,31 @@ class pb : public QMainWindow
 		void player_stop();
 		void player_seek(int location);
 		void player_next();
-		void fullscreen_toggle();
+		void player_togglefullscreen();
 		void player_previous();
 		void player_change_media(int index);
 		void player_toggle();
+		void player_skipforward();
+		void player_skipbackward();
+		void player_togglemuted();
+		void player_volumeup();
+		void player_volumedown();
 		void player_volume(int value);
+		void player_speedup();
+		void player_speeddown();
 		void mediaChanged(qint64 duration);
 		void check_controls(qint64 position);
 		void fire_toggle(bool event);
+		void update_vol(int vol);
 
 	private:
 		Ui::pb *ui;
 		int lastmousemovement;
 		microtimer mousetimetracker;
 		bool event(QEvent *event);
+		bool keybind(int key);
+
+		static QString PLAYHISTORY_CONNECTION;
 
 
 };

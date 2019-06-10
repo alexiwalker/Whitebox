@@ -16,7 +16,7 @@ databasehandler::databasehandler(QString name)
 databasehandler::~databasehandler(){
 }
 
-void databasehandler::insertdata(QString table, QJsonObject values){
+void databasehandler::insertdata(QString table, QJsonObject values, QString connection){
 	QString query = "Insert into shows (path, showname,season, episode,lastwatch,playcount) VALUES ("
 	"\""+values["path"].toString() + "\","
 	"\""+values["showname"].toString() + "\","
@@ -26,7 +26,7 @@ void databasehandler::insertdata(QString table, QJsonObject values){
 	""+QString::number(values["playcount"].toInt()) + ""
 	"); ";
 
-	QSqlQuery result = execquery(query);
+	QSqlQuery result = execquery(query,connection);
 }
 
 void databasehandler::insert_ignore_build(QString table, QString columns, QString values){
@@ -44,13 +44,13 @@ void databasehandler::insert_ignore_execute(){
 
 }
 
-void databasehandler::updatedata(QString table, QJsonObject values){
+void databasehandler::updatedata(QString table, QJsonObject values, QString connection){
 
 }
 
-QString databasehandler::querydata(QString query, QString column){
-	QSqlDatabase::removeDatabase("connection");
-	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE","connection");
+QString databasehandler::querydata(QString query, QString column, QString connection){
+	QSqlDatabase::removeDatabase(connection);
+	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE",connection);
 	db.setDatabaseName("data.db");
 	QString qresult = "";
 	if(db.open()){
@@ -59,17 +59,17 @@ QString databasehandler::querydata(QString query, QString column){
 		qresult = result.value(column).toString();
 	}
 	else{
-//		qDebug() << "connection failed: " << db.lastError() << endl;
+
 	}
 
 
 	return qresult;
 }
 
-QSqlQuery databasehandler::execquery(QString query){
+QSqlQuery databasehandler::execquery(QString query, QString connection){
 
-	QSqlDatabase::removeDatabase("connection");
-	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE","connection");
+	QSqlDatabase::removeDatabase(connection);
+	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE",connection);
 	db.setDatabaseName("data.db");
 
 	if(db.open()){
@@ -92,10 +92,11 @@ QString databasehandler::qnow(){
 }
 
 void databasehandler::initdb(){
-	QSqlDatabase::removeDatabase("connection");
-	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE","connection");
+	QSqlDatabase::removeDatabase(DB_STANDARD_CONNECTION);
+	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE",DB_STANDARD_CONNECTION);
 	db.setDatabaseName("data.db");
 	if(db.open()){
+
 		db.exec(" CREATE TABLE IF NOT EXISTS `shows` (\
 		`path` text NOT NULL,\
 		`showname` text NOT NULL,\
@@ -108,9 +109,25 @@ void databasehandler::initdb(){
 		CONSTRAINT episodedetails PRIMARY KEY (showname,season,episode)) ");
 
 		db.exec(" CREATE TABLE IF NOT EXISTS `watchhistory` (\
-		`path` text NOT NULL, \
+		`showname` text NOT NULL,\
+		`season` int(2) NOT NULL,\
+		`episode` int(2) NOT NULL,\
 		`when` timestamp NOT NULL,\
 		`duration` int default 0,\
 		`progress` int default 0 )");
+
+		db.exec ("CREATE TABLE IF NOT EXISTS `auto_rename` ("
+		"`from` text not null, "
+		"`to` text not null)");
+
+		db.exec("CREATE TABLE IF NOT EXISTS `magnets` ("
+		"`show` text not null,"
+		"`season` int not null,"
+		"`episode` int not null,"
+		"`magnet` int not null,"
+		")");
+
 	}
 }
+
+QString databasehandler::DB_STANDARD_CONNECTION = "connection";
