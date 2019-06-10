@@ -20,11 +20,20 @@ show_widget::show_widget(QString show)
 	this->setProperty("showname",showname);
 	layout2->addWidget(innerwidget);
 
+
+	showbanner = new QWidget;
+	QString formaturl = QDir::toNativeSeparators("C:\\Users\\Alexa\\PycharmProjects\\impling\\images\\the 100\\The-100-Cast-Promos-the-100-tv-show-37080703-1024-768.png").replace("\\","/");
+	showbanner->setObjectName("showbanner");
+	showbanner->setStyleSheet("#showbanner{border-image: url("+formaturl+");border-width:0px;border-radius:0px}");
+	showbanner->setFixedSize(125,125);
+//	layout->addWidget(showbanner,0,0);
+//	layout->setAlignment(showbanner,Qt::AlignCenter);
+
 	mainlabel = new QLabel;
 	mainlabel->setText(showname);
 	mainlabel->setAlignment(Qt::AlignCenter);
 	mainlabel->setWordWrap(true);
-	layout->addWidget(mainlabel,0,0,0,2);
+	layout->addWidget(mainlabel,1,0);
 
 	playbutton = new QPushButton;
 	playbutton->setObjectName(showname);
@@ -45,8 +54,9 @@ show_widget::show_widget(QString show)
 	restart->setProperty("showname",showname);
 	restart->setText("restart");
 
-	layout->addWidget(resume,3,1);
+	layout->addWidget(resume,4,0);
 //	layout->addWidget(restart,3,1);
+
 }
 
 
@@ -73,7 +83,7 @@ QString show_widget::not_selected_style =
 "border-width: 1px;"
 "border-color: black;} "
 ".QLabel{"
-"font-size:20px;"
+"font-size:12px;"
 "}";
 
 
@@ -84,6 +94,6 @@ QString show_widget::selected_style =
 "border-color: white;"
 "border-radius: 10px}"
 ".QLabel{"
-"font-size:20px;"
+"font-size:12px;"
 "}";
 

@@ -26,10 +26,6 @@ CONFIG += c++11
 
 SOURCES += \
 	main.cpp \
-	wb.cpp \
-	sw.cpp \
-	tw.cpp \
-        pb.cpp \
 	classes/data/databasehander.cpp \
 	classes/ui/flowlayout.cpp \
 	classes/ui/episode_widget.cpp \
@@ -37,13 +33,16 @@ SOURCES += \
 	classes/ui/player_playlist.cpp \
 	classes/process/http_scrape.cpp \
 	classes/process/linked_mem_buffer.cpp \
-	classes/process/microtimer.cpp
+	classes/process/microtimer.cpp \
+	classes/ui/flow_grid_layout.cpp \
+	classes/ui/tools/reconcile.cpp \
+    classes/process/settings.cpp \
+    playback.cpp \
+    settingswindow.cpp \
+    toolswindow.cpp \
+    whitebox.cpp
 
 HEADERS += \
-        wb.h \
-	sw.h \
-	tw.h \
-        pb.h \
 	classes/data/databasehandler.h \
 	classes/ui/flowlayout.h \
 	classes/process/http_scrape.h \
@@ -51,23 +50,29 @@ HEADERS += \
 	classes/process/microtimer.h \
 	classes/ui/player_playlist.h \
 	classes/ui/episode_widget.h \
-	classes/ui/show_widget.h
+	classes/ui/show_widget.h \
+	classes/ui/flow_grid_layout.h \
+	classes/ui/tools/reconcile.h \
+    classes/process/settings.h \
+    playback.h \
+    settingswindow.h \
+    toolswindow.h \
+    whitebox.h
 
 FORMS += \
-	wb.ui \
-	sw.ui \
-	tw.ui \
-        pb.ui
+    playback.ui \
+    settingswindow.ui \
+    toolswindow.ui \
+    whitebox.ui
 
-#win32:RC_ICONS += wbi.ico
+win32:RC_ICONS += box2.ico
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-DISTFILES += \
-    textdump
+DISTFILES +=
 
 RESOURCES += \
     icons.qrc

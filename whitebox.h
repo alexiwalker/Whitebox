@@ -11,25 +11,24 @@
 #include "classes/ui/episode_widget.h"
 #include "classes/ui/show_widget.h"
 
-#include "sw.h"
-#include "tw.h"
-#include "pb.h"
+#include "settingswindow.h"
+#include "toolswindow.h"
+#include "playback.h"
 
 namespace Ui {
 	class wb;
 	}
 
-class wb : public QMainWindow
+class whiteBox : public QMainWindow
 	{
 	Q_OBJECT
 
 public:
-	explicit wb(QWidget *parent = nullptr);
-	~wb();
+	explicit whiteBox(QWidget *parent = nullptr);
+	~whiteBox();
 	void set_file_open_handle(QString file);
 
 	static bool extract_episode_details(QString showpath, QString &showname, int &season, int &episode);
-
 
 private slots:
 
@@ -61,9 +60,9 @@ private slots:
 private:
 
 	Ui::wb *ui;
-	sw* settingswindow = nullptr;
-	tw* toolswindow = nullptr;
-	pb* playerwindow = nullptr;
+	settingsWindow* settingswindow = nullptr;
+	toolsWindow* toolswindow = nullptr;
+	playbackWindow* playerwindow = nullptr;
 
 	QMediaPlayer* player;
 	QMediaPlaylist* playlist;
@@ -71,16 +70,12 @@ private:
 	QString library;
 	QString source;
 
-
 	void deleteLayoutContents(QLayout* layout);
 	void clearlayout(QLayout* layout);
 
-
 	int pw = 0;
-	void savesettings(QString key, int value);
-	void savesettings(QString key, QString value);
-	QString loadsettings(QString key, QString defaultval);void closeEvent (QCloseEvent *event);
 
+	void closeEvent (QCloseEvent *event);
 
 	std::vector<show_widget*>* showslist = new std::vector<show_widget*>;
 	QScrollArea* show_scroll_area = new QScrollArea;
@@ -91,7 +86,11 @@ private:
 
 	QFuture<QString> file_handle_future;
 	QFutureWatcher<QString> file_handle_watcher;
+
 	static QString file_handle_memory();
+
+	/** I just wish that QString had this as a member function... **/
+	static QString toCamelCase(const QString& s);
 
 	};
 

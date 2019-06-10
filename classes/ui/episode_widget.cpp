@@ -31,7 +31,7 @@
 
 episode_widget::episode_widget(QString showname, QString path, int season, int episode,int fileduration, int lastprogress)
 {
-	this->setFixedSize(100,100);
+	this->setFixedSize(90,90);
 	this->setObjectName(path);
 	widget_layout = new QGridLayout;
 	widget_layout->setMargin(0);
@@ -41,10 +41,17 @@ episode_widget::episode_widget(QString showname, QString path, int season, int e
 	this->setProperty("season",season);
 	this->setProperty("episode",episode);
 
+	QString workingtooltip = showname + " season " + QString::number(season) + ", episode " + QString::number(episode) + "\n "+ path;
+
 	bool filexists = false;
 	QFile mediafile(path);
 	if(mediafile.exists())
 		filexists=true;
+	else {
+		workingtooltip += "\n File not found";
+	}
+
+	this->setToolTip(workingtooltip);
 
 	episode_play = new QPushButton;
 	episode_play->setText(">");
@@ -59,6 +66,11 @@ episode_widget::episode_widget(QString showname, QString path, int season, int e
 	playlist_add->setProperty("showname",showname);
 	playlist_add->setProperty("season",season);
 	playlist_add->setProperty("episode",episode);
+
+	if(!filexists){
+		episode_play->setEnabled(false);
+		playlist_add->setEnabled(false);
+	}
 
 	watch_progress = new QProgressBar;
 	watch_progress->setTextVisible(false);
@@ -97,23 +109,28 @@ episode_widget::episode_widget(QString showname, QString path, int season, int e
 bool episode_widget::event(QEvent *event){
 
 	if(event->type() == QEvent::Enter){
+
 		if(this->property("available").toBool()){
 			this->setStyleSheet(EPISODE_SELECTED);
-		}else{
+		} else {
 			this->setStyleSheet(EPISODE_SELECTED_NOT_AVAILABLE);
 		}
+
+		return true;
 	}
 
 	if(event->type() == QEvent::Leave){
+
 		if(this->property("available").toBool()){
 			this->setStyleSheet(EPISODE_NOT_SELECTED);
-
-		}else{
+		} else {
 			this->setStyleSheet(EPISODE_NOT_SELECTED_NOT_AVAILABLE);
 		}
+
+		return true;
 	}
 
-	return true;
+	return QWidget::event(event);
 
 }
 

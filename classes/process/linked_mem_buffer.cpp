@@ -32,6 +32,12 @@ bool linked_mem_buffer::create(){
 	sharedMemory->attach();
 	return b;
 }
+void linked_mem_buffer::close(){
+	clear();
+	sharedMemory->unlock();
+	sharedMemory->detach();
+	delete sharedMemory;
+}
 
 void linked_mem_buffer::write(char* string){
 	QBuffer buffer;

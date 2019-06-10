@@ -18,13 +18,13 @@ namespace Ui {
 	class tw;
 }
 
-class tw : public QMainWindow
+class toolsWindow : public QMainWindow
 {
 		Q_OBJECT
 
 	public:
-		explicit tw(QWidget *parent = nullptr);
-		~tw();
+		explicit toolsWindow(QWidget *parent = nullptr);
+		~toolsWindow();
 
 public slots:
 	void build_index_finished();
@@ -39,8 +39,6 @@ private slots:
 
 	void on_build_index_clicked();
 
-
-
 	static bool async_rename(QString from, QString to);
 
 	void show_rename();
@@ -50,12 +48,13 @@ private slots:
 
 	void on_dbg_clicked();
 
+	void on_show_images_clicked();
+
 	private:
 		Ui::tw *ui;
 
-		void savesettings(QString key, int value);
-		void savesettings(QString key, QString value);
-		QString loadsettings(QString key, QString defaultval);
+
+
 		QString autoload = "";
 		QString library = "";
 		QString source = "";
@@ -78,6 +77,8 @@ private slots:
 		QLineEdit* newname;
 		QListWidget* showlistfrom;
 		QListWidget* showlistto;
+
+		static QString LIBRARY_INDEX_CONNECTION;
 public:
 		void index_public_button();
 

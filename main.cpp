@@ -1,4 +1,4 @@
-#include "wb.h"
+#include "whitebox.h"
 #include <QApplication>
 #include <QDebug>
 
@@ -16,14 +16,15 @@ int main(int argc, char *argv[])
 	if(shared_buffer.exists()){
 		if(argc>1){
 			shared_buffer.create();
+			shared_buffer.clear();
 			shared_buffer.write(argv[1]);
+			return 1;
 		}
-		return 1;
 	}
 
 	shared_buffer.create();
 
-	wb w;
+	whiteBox w;
 
 	if(argc > 1)
 		w.set_file_open_handle(a.arguments().at(1));

@@ -1,6 +1,6 @@
-#include "tw.h"
-#include "ui_tw.h"
-#include "wb.h"
+#include "toolswindow.h"
+#include "ui_toolswindow.h"
+#include "whitebox.h"
 #include <QDirIterator>
 #include <QSettings>
 #include <QDebug>
@@ -11,6 +11,8 @@
 #include <QFutureWatcher>
 #include <QGridLayout>
 #include <classes/process/linked_mem_buffer.h>
+#include <classes/ui/tools/reconcile.h>
+#include <classes/process/settings.h>
 
 /**
  * The Tools Window class should provided links to associated standalone programs that provide utility functions.
@@ -30,79 +32,54 @@
  *
  */
 
+QString toolsWindow::LIBRARY_INDEX_CONNECTION = "TOOLS_WINDOW_DATABSE_CONNECTION";
 
-
-tw::tw(QWidget *parent) :
-QMainWindow(parent),
-ui(new Ui::tw)
+toolsWindow::toolsWindow(QWidget *parent) :
+	QMainWindow(parent),
+	ui(new Ui::tw)
 {
 	ui->setupUi(this);
-	library = loadsettings("library","");
-	source = loadsettings("source", "");
+	library = settings::load_setting("library","");
+	source = settings::load_setting("source", "");
 	connect(&build_index_watcher, SIGNAL(finished()), this, SLOT(build_index_finished()));
 
 
 	connect(&show_rename_watcher, SIGNAL(finished()), this, SLOT(show_rename_finished()));
 }
 
-tw::~tw()
+toolsWindow::~toolsWindow()
 {
 	this->hide();
 }
 
-void tw::closeEvent (QCloseEvent *event){
+void toolsWindow::closeEvent (QCloseEvent *event){
 	this->hide();
 }
 
 
-void tw::savesettings(QString key, QString value) {
-	QCoreApplication::setOrganizationName("Walkersoft");
-	QCoreApplication::setApplicationName("whitebox");
-
-	QSettings settings("settings.ini",QSettings::IniFormat);
-	settings.setValue(key, value);
-}
-
-void tw::savesettings(QString key, int value) {
-	QCoreApplication::setOrganizationName("Walkersoft");
-	QCoreApplication::setApplicationName("whitebox");
-	QSettings settings("settings.ini",QSettings::IniFormat);
-	settings.setValue(key, value);
-}
-
-QString tw::loadsettings(QString key, QString defaultval) {
-	QCoreApplication::setOrganizationName("Walkersoft");
-	QCoreApplication::setApplicationName("whitebox");
-
-	QSettings settings("settings.ini",QSettings::IniFormat);
-	return settings.value(key, defaultval).toString();
-}
-
-
-
 /** SAVE FILE INFO TO DATABSE **/
-void tw::on_build_index_clicked()
+void toolsWindow::on_build_index_clicked()
 {
 	ui->build_index->setDisabled(true);
 	build_index();
 }
 
-void tw::build_index(){
+void toolsWindow::build_index(){
 	build_index_future = QtConcurrent::run(async_index,library,source);
 	build_index_watcher.setFuture(build_index_future);
 }
 
-void tw::build_index_finished(){
+void toolsWindow::build_index_finished(){
 	ui->build_index->setDisabled(false);
 
 }
 
-void tw::index_public_button(){
+void toolsWindow::index_public_button(){
 	on_build_index_clicked();
 }
 
 
-bool tw::async_index(QString location,QString location2)
+bool toolsWindow::async_index(QString location,QString location2)
 {
 	/**
 	 * @brief prototype : build library db from found files
@@ -136,7 +113,14 @@ bool tw::async_index(QString location,QString location2)
 			int season;
 			int episode;
 
-			if (wb::extract_episode_details(fileinfo.absoluteFilePath(), showname, season, episode)) {
+			if (whiteBox::extract_episode_details(fileinfo.absoluteFilePath(), showname, season, episode)) {
+
+
+				QSqlQuery renames = databasehandler::execquery ("select * from `auto_rename` where `from` = '"+showname+"'", LIBRARY_INDEX_CONNECTION);
+				if(renames.isValid ()){
+					showname = renames.value("to").toString ();
+				}
+
 
 				object["path"] = fileinfo.absoluteFilePath();
 				object["lastwatch"] = NULL;
@@ -145,7 +129,7 @@ bool tw::async_index(QString location,QString location2)
 				object["season"] = season;
 				object["episode"] = episode;
 
-				databasehandler::insertdata("shows", object);
+				databasehandler::insertdata("shows", object, LIBRARY_INDEX_CONNECTION);
 
 			}
 		}
@@ -161,23 +145,21 @@ bool tw::async_index(QString location,QString location2)
 
 /** Rename Show **/
 
-void tw::on_show_rename_clicked()
+void toolsWindow::on_show_rename_clicked()
 {
 	ui->show_rename->setDisabled(true);
 	show_rename();
-
-
 }
 
 
-bool tw::async_rename(QString from, QString to){
+bool toolsWindow::async_rename(QString from, QString to){
 
 	QString query = "Update shows set showname = \'"+to+"\' where showname = \'"+from+"\' ";
 
 	return true;
 }
 
-void tw::show_rename(){
+void toolsWindow::show_rename(){
 
 	QLabel* fromlabel = new QLabel;
 	QLabel* tolabel = new QLabel;
@@ -187,7 +169,6 @@ void tw::show_rename(){
 	fromlabel->setText("Show to rename");
 	tolabel->setText("Rename to...");
 	customtolabel->setText("Or choose a new name");
-
 
 	newname = new QLineEdit;
 	showlistfrom = new QListWidget;
@@ -218,20 +199,17 @@ void tw::show_rename(){
 	ui->tool_window_controls->layout()->addWidget(newname);
 	ui->tool_window_controls->layout()->addWidget(startrename);
 
-
 	connect(startrename, SIGNAL(clicked()), this, SLOT(show_rename_run()));
-
-
 
 }
 
-void tw::show_rename_finished(){
+void toolsWindow::show_rename_finished(){
 	ui->show_rename->setDisabled(false);
 	qDebug()  << " showrename finished " << endl;
 }
 
 
-void tw::show_rename_run(){
+void toolsWindow::show_rename_run(){
 
 	int index = showlistfrom->currentRow();
 	if(index != -1)
@@ -251,7 +229,30 @@ void tw::show_rename_run(){
 	qDebug() << newname->text() << endl;
 }
 
-void tw::on_dbg_clicked()
+void toolsWindow::on_dbg_clicked()
 {
-	//
+	reconcile* reconcilewidget = new reconcile;
+
+	ui->tool_window_controls->layout()->addWidget(reconcilewidget);
+
+}
+
+void toolsWindow::on_show_images_clicked()
+{
+	QString query = "select distinct showname from shows";
+	QSqlQuery result = databasehandler::execquery(query);
+	QJsonObject jobject;
+	if(result.isValid()){
+		do {
+			jobject[result.value("showname").toString()]="";
+		} while (result.next());
+
+
+	QJsonDocument doc(jobject);
+	QString jstring(doc.toJson());
+
+	qDebug() << jstring << endl;
+
+	}
+
 }

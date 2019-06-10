@@ -7,13 +7,13 @@ namespace Ui {
 	class sw;
 }
 
-class sw : public QMainWindow
+class settingsWindow : public QMainWindow
 {
 		Q_OBJECT
 
 	public:
-		explicit sw(QWidget *parent = nullptr);
-		~sw();
+		explicit settingsWindow(QWidget *parent = nullptr);
+		~settingsWindow();
 
 	private slots:
 		void on_librarybutton_clicked();
@@ -25,9 +25,6 @@ class sw : public QMainWindow
 
 	private:
 		Ui::sw *ui;
-		void savesettings(QString key, int value);
-		void savesettings(QString key, QString value);
-		QString loadsettings(QString key, QString defaultval);
 		void closeEvent (QCloseEvent *event);
 
 };
