@@ -50,10 +50,10 @@ private slots:
 
 	void on_show_images_clicked();
 
+	void on_replace_clicked();
+
 	private:
 		Ui::tw *ui;
-
-
 
 		QString autoload = "";
 		QString library = "";

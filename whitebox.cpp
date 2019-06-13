@@ -29,6 +29,7 @@
 #include <classes/ui/episode_widget.h>
 #include <classes/ui/player_playlist.h>
 #include <classes/process/settings.h>
+#include <classes/process/util.h>
 
 whiteBox::whiteBox(QWidget *parent) :
 QMainWindow(parent),
@@ -73,7 +74,7 @@ void whiteBox::closeEvent (QCloseEvent *event){
 
 QString whiteBox::file_handle_memory(){
 	QString read = "";
-	linked_mem_buffer mem(linked_mem_buffer::SINGLE_INSTANCE,false);
+	SharedMemory mem(SharedMemory::SINGLE_INSTANCE,false);
 	/**
 
 	  this was going to be in an infinite loop until it found something, but ::run can't be cancelled
@@ -597,7 +598,7 @@ bool whiteBox::extract_episode_details(QString showpath, QString &showname, int 
 				if (std::regex_search(filename, shownamematch, nameregex)){
 					showname = QString::fromStdString(shownamematch[0]);
 					showname.replace(".", " ");
-					showname = toCamelCase(showname);
+					showname = util::toCamelCase(showname);
 
 				}
 
@@ -739,11 +740,3 @@ void whiteBox::on_search_textChanged(const QString &arg1){
 	}
 }
 
-QString whiteBox::toCamelCase(const QString& s)
-{
-	QStringList parts = s.split(' ', QString::SkipEmptyParts);
-	for (int i = 0; i < parts.size(); ++i)
-		parts[i].replace(0, 1, parts[i][0].toUpper());
-
-	return parts.join(" ");
-}

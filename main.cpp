@@ -12,14 +12,12 @@ int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
 
-	linked_mem_buffer shared_buffer(linked_mem_buffer::SINGLE_INSTANCE,false);
-	if(shared_buffer.exists()){
-		if(argc>1){
+	SharedMemory shared_buffer(SharedMemory::SINGLE_INSTANCE,false);
+	if(shared_buffer.exists() && argc>1){
 			shared_buffer.create();
 			shared_buffer.clear();
 			shared_buffer.write(argv[1]);
 			return 1;
-		}
 	}
 
 	shared_buffer.create();

@@ -12,6 +12,7 @@
 #include <QGridLayout>
 #include <classes/process/linked_mem_buffer.h>
 #include <classes/ui/tools/reconcile.h>
+#include <classes/ui/tools/replace.h>
 #include <classes/process/settings.h>
 
 /**
@@ -255,4 +256,13 @@ void toolsWindow::on_show_images_clicked()
 
 	}
 
+}
+
+void toolsWindow::on_replace_clicked()
+{
+	replace* replacewidget = new replace;
+	qDebug() << " hi " << endl;
+
+	ui->tool_window_controls->layout()->addWidget(replacewidget);
+//	replacewidget->show();
 }

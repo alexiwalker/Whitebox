@@ -40,7 +40,9 @@ SOURCES += \
     playback.cpp \
     settingswindow.cpp \
     toolswindow.cpp \
-    whitebox.cpp
+    whitebox.cpp \
+    classes/ui/tools/replace.cpp \
+    classes/process/util.cpp
 
 HEADERS += \
 	classes/data/databasehandler.h \
@@ -57,7 +59,9 @@ HEADERS += \
     playback.h \
     settingswindow.h \
     toolswindow.h \
-    whitebox.h
+    whitebox.h \
+    classes/ui/tools/replace.h \
+    classes/process/util.h
 
 FORMS += \
     playback.ui \

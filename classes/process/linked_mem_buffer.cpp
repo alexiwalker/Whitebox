@@ -1,10 +1,10 @@
 #include "linked_mem_buffer.h"
 
-QString linked_mem_buffer::SINGLE_INSTANCE  = "b345c1f06417fd9c";
-QString linked_mem_buffer::FILE_HANDLE  = "5c53535bab1d2122";
+QString SharedMemory::SINGLE_INSTANCE  = "b345c1f06417fd9c";
+QString SharedMemory::FILE_HANDLE  = "5c53535bab1d2122";
 
 
-linked_mem_buffer::linked_mem_buffer(QString key, bool create=false)
+SharedMemory::SharedMemory(QString key, bool create=false)
 {
 	sharedMemory = new QSharedMemory;
 	sharedMemory->setKey(key);
@@ -15,31 +15,31 @@ linked_mem_buffer::linked_mem_buffer(QString key, bool create=false)
 }
 
 
-QString linked_mem_buffer::read(){
+QString SharedMemory::read(){
 	sharedMemory->lock();
 	QString data = static_cast<char*>(sharedMemory->data());
 	sharedMemory->unlock();
 	return data;
 }
 
-void linked_mem_buffer::write(QString string){
+void SharedMemory::write(QString string){
 	char* vals = string.toLocal8Bit().data();
 	write(vals);
 }
 
-bool linked_mem_buffer::create(){
+bool SharedMemory::create(){
 	bool b = sharedMemory->create(1);
 	sharedMemory->attach();
 	return b;
 }
-void linked_mem_buffer::close(){
+void SharedMemory::close(){
 	clear();
 	sharedMemory->unlock();
 	sharedMemory->detach();
 	delete sharedMemory;
 }
 
-void linked_mem_buffer::write(char* string){
+void SharedMemory::write(char* string){
 	QBuffer buffer;
 	buffer.open(QIODevice::ReadWrite);
 	buffer.write(string);
@@ -61,11 +61,11 @@ void linked_mem_buffer::write(char* string){
 
 }
 
-bool linked_mem_buffer::attach(){
+bool SharedMemory::attach(){
 	return sharedMemory->attach();
 }
 
-bool linked_mem_buffer::exists(){
+bool SharedMemory::exists(){
 	if(sharedMemory->isAttached())
 		return true;
 	else {
@@ -78,7 +78,7 @@ bool linked_mem_buffer::exists(){
 	return false;
 }
 
-void linked_mem_buffer::clear(){
+void SharedMemory::clear(){
 	sharedMemory->lock();
 	void* voidpt = sharedMemory->data();
 	memset(voidpt,'\0', sharedMemory->size());

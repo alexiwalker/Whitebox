@@ -11,6 +11,7 @@
 #include "classes/data/databasehandler.h"
 #include "classes/ui/player_playlist.h"
 #include <QApplication>
+#include <classes/process/util.h>
 
 
 QString playbackWindow::PLAYHISTORY_CONNECTION = "PLAYBACK_DATABASE_CONNECTION";
@@ -147,7 +148,7 @@ void playbackWindow::mediaChanged(qint64 duration){
 	episode = result.value("episode").toString();
 
 
-	QString query2  = "insert into `watchhistory` ('showname','season','episode','when') VALUES (\""+showname+"\",\""+season+"\",\""+episode+"\", "+databasehandler::qnow()+")";
+	QString query2  = "insert into `watchhistory` ('showname','season','episode','when') VALUES (\""+showname+"\",\""+season+"\",\""+episode+"\", "+util::qnow()+")";
 	result =databasehandler::execquery(query2, PLAYHISTORY_CONNECTION);
 	this->setWindowTitle(path);
 
