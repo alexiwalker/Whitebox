@@ -89,9 +89,6 @@ private:
 
 	static QString file_handle_memory();
 
-	/** I just wish that QString had this as a member function... **/
-	static QString toCamelCase(const QString& s);
-
 	};
 
 #endif // WB_H

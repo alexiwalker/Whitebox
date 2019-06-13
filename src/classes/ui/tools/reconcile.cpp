@@ -8,9 +8,11 @@
 #include <QDir>
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrent>
-#include "reconcile.h"
-#include "classes/data/databasehandler.h"
+#include <classes/data/databasehandler.h>
+#include <classes/process/settings.h>
+#include <classes/process/util.h>
 
+#include "reconcile.h"
 /*
  * Tooling to move all shows in the db to the library location
  * changes any showname that can be evaluated to showname_s08e02 form to a standardised version
@@ -23,28 +25,7 @@ reconcile::reconcile()
 	create_ui();
 }
 
-void reconcile::savesettings(QString key, QString value) {
-	QCoreApplication::setOrganizationName("Walkersoft");
-	QCoreApplication::setApplicationName("whitebox");
 
-	QSettings settings("settings.ini",QSettings::IniFormat);
-	settings.setValue(key, value);
-}
-
-void reconcile::savesettings(QString key, int value) {
-	QCoreApplication::setOrganizationName("Walkersoft");
-	QCoreApplication::setApplicationName("whitebox");
-	QSettings settings("settings.ini",QSettings::IniFormat);
-	settings.setValue(key, value);
-}
-
-QString reconcile::loadsettings(QString key, QString defaultval) {
-	QCoreApplication::setOrganizationName("Walkersoft");
-	QCoreApplication::setApplicationName("whitebox");
-
-	QSettings settings("settings.ini",QSettings::IniFormat);
-	return settings.value(key, defaultval).toString();
-}
 
 QString reconcile::create_name(QString file, QString &basepath){
 	QString name = "";
@@ -65,7 +46,7 @@ QString reconcile::create_name(QString file, QString &basepath){
 		if (result.isValid())
 			showname = result.value("to").toString();
 
-		QString base = loadsettings("library", "");
+		QString base = settings::load_setting("library", "");
 
 		QFileInfo f(file);
 		QString extension = f.suffix();
@@ -75,7 +56,7 @@ QString reconcile::create_name(QString file, QString &basepath){
 		basepath = folderlocation;
 		//sets name to arrow_s01e01.mkv. format
 		name = folderlocation + "/" + showname + "_S" + season + "E" + episode + "." + extension;
-		toCamelCase(name);
+		util::toCamelCase(name);
 
 	}
 
@@ -84,7 +65,7 @@ QString reconcile::create_name(QString file, QString &basepath){
 
 QSqlQuery reconcile::get_shows(){
 
-	QString source = loadsettings("source","");
+	QString source = settings::load_setting("source","");
 	QString querystring = "Select * from shows where path like '%"+source+"'%";
 	QSqlQuery results = databasehandler::execquery(querystring,reconcile_connection);
 	return results;
@@ -175,12 +156,4 @@ void reconcile::async_exec(){
 void reconcile::exec_finished(){
 	execute_button->setEnabled(true);
 	emit execute_finished();
-}
-
-QString reconcile::toCamelCase(const QString& s){
-	QStringList parts = s.split(' ', QString::SkipEmptyParts);
-	for (int i = 0; i < parts.size(); ++i)
-		parts[i].replace(0, 1, parts[i][0].toUpper());
-
-	return parts.join(" ");
 }

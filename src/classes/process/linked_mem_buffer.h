@@ -7,10 +7,10 @@
 #include <QDataStream>
 
 
-class linked_mem_buffer
+class SharedMemory
 	{
 public:
-	linked_mem_buffer(QString key,bool create);
+	SharedMemory(QString key,bool create);
 
 	QString read();
 	void write(QString string);
@@ -18,7 +18,7 @@ public:
 	void clear();
 	bool exists();
 
-	/* Constants for specifying usages with arbitrary values */
+	/* for specifying usages with arbitrary values, add/remove/modify as needed */
 	static QString SINGLE_INSTANCE;
 	static QString FILE_HANDLE;
 

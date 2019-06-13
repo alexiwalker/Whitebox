@@ -1,18 +1,16 @@
 #include "whitebox.h"
 #include "ui_whitebox.h"
+
 #include "settingswindow.h"
 #include "toolswindow.h"
+
 #include <QDirIterator>
 #include <QResizeEvent>
 #include <QScrollArea>
 #include <QPushButton>
-#include <QEventLoop>
 #include <QLabel>
 #include <QScrollBar>
-#include <QSettings>
 #include <QDebug>
-#include <regex>
-#include <chrono>
 #include <QFile>
 #include <QUrl>
 #include <QMessageBox>
@@ -21,6 +19,10 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrent>
+
+#include <regex>
+#include <chrono>
+
 #include <classes/data/databasehandler.h>
 #include <classes/process/microtimer.h>
 #include <classes/process/linked_mem_buffer.h>
@@ -29,6 +31,7 @@
 #include <classes/ui/episode_widget.h>
 #include <classes/ui/player_playlist.h>
 #include <classes/process/settings.h>
+#include <classes/process/util.h>
 
 whiteBox::whiteBox(QWidget *parent) :
 QMainWindow(parent),
@@ -66,6 +69,11 @@ whiteBox::~whiteBox()
 }
 
 void whiteBox::closeEvent (QCloseEvent *event){
+	/**
+	 * Warning: 'event' unreferenced formal parameter:
+	 * As it is overriding an existing function, the blueprint must be the same
+	 * However, this parameter is not required for use at this time, but is available incase it is later
+	**/
 	delete settingswindow;
 	delete toolswindow;
 	delete playerwindow;
@@ -73,7 +81,7 @@ void whiteBox::closeEvent (QCloseEvent *event){
 
 QString whiteBox::file_handle_memory(){
 	QString read = "";
-	linked_mem_buffer mem(linked_mem_buffer::SINGLE_INSTANCE,false);
+	SharedMemory mem(SharedMemory::SINGLE_INSTANCE,false);
 	/**
 
 	  this was going to be in an infinite loop until it found something, but ::run can't be cancelled
@@ -597,7 +605,7 @@ bool whiteBox::extract_episode_details(QString showpath, QString &showname, int 
 				if (std::regex_search(filename, shownamematch, nameregex)){
 					showname = QString::fromStdString(shownamematch[0]);
 					showname.replace(".", " ");
-					showname = toCamelCase(showname);
+					showname = util::toCamelCase(showname);
 
 				}
 
@@ -739,11 +747,3 @@ void whiteBox::on_search_textChanged(const QString &arg1){
 	}
 }
 
-QString whiteBox::toCamelCase(const QString& s)
-{
-	QStringList parts = s.split(' ', QString::SkipEmptyParts);
-	for (int i = 0; i < parts.size(); ++i)
-		parts[i].replace(0, 1, parts[i][0].toUpper());
-
-	return parts.join(" ");
-}

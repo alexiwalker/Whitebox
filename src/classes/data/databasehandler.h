@@ -6,7 +6,6 @@ class databasehandler
 {
 public:
 	databasehandler(QString name = "data.db");
-	static QString qnow(); //for timestamping inserts
 
 	static void initdb(); //Contains information required to construct the database from nothing, only run if the file does not exist or is empty
 	static void insertdata(QString table, QJsonObject values, QString connection=DB_STANDARD_CONNECTION);

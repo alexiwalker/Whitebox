@@ -15,7 +15,28 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="1" rowspan="6">
+    <item row="4" column="0">
+     <widget class="QPushButton" name="show_images">
+      <property name="text">
+       <string>Find Images</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QPushButton" name="dbg">
+      <property name="text">
+       <string>File Reconciliation</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QPushButton" name="build_index">
+      <property name="text">
+       <string>locate files</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2" rowspan="7">
      <widget class="QWidget" name="tool_window_controls" native="true">
       <layout class="QGridLayout" name="gridLayout_2">
        <item row="0" column="0">
@@ -41,7 +62,7 @@
       </property>
      </widget>
     </item>
-    <item row="5" column="0">
+    <item row="6" column="0">
      <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -54,24 +75,17 @@
       </property>
      </spacer>
     </item>
-    <item row="0" column="0">
-     <widget class="QPushButton" name="build_index">
+    <item row="5" column="0">
+     <widget class="QPushButton" name="replace">
       <property name="text">
-       <string>locate files</string>
+       <string>replace file</string>
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QPushButton" name="dbg">
-      <property name="text">
-       <string>File Reconciliation</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QPushButton" name="show_images">
-      <property name="text">
-       <string>Find Images</string>
+    <item row="0" column="1" rowspan="7">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
      </widget>
     </item>

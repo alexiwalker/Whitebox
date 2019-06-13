@@ -82,15 +82,6 @@ QSqlQuery databasehandler::execquery(QString query, QString connection){
 }
 
 
-QString databasehandler::qnow(){
-
-	unsigned __int64 now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-	QString qnow = QString::number(now);
-
-	return qnow;
-
-}
-
 void databasehandler::initdb(){
 	QSqlDatabase::removeDatabase(DB_STANDARD_CONNECTION);
 	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE",DB_STANDARD_CONNECTION);

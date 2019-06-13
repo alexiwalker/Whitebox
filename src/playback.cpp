@@ -11,6 +11,7 @@
 #include "classes/data/databasehandler.h"
 #include "classes/ui/player_playlist.h"
 #include <QApplication>
+#include <classes/process/util.h>
 
 
 QString playbackWindow::PLAYHISTORY_CONNECTION = "PLAYBACK_DATABASE_CONNECTION";
@@ -97,6 +98,11 @@ playbackWindow::~playbackWindow()
 
 
 void playbackWindow::fire_toggle(bool event){
+	/**
+	 * Warning: 'event' unreferenced formal parameter:
+	 * As it is overriding an existing function, the blueprint must be the same
+	 * However, this parameter is not required for use at this time, but is available incase it is later
+	**/
 	this->playlist_view->toggle();
 }
 
@@ -147,7 +153,7 @@ void playbackWindow::mediaChanged(qint64 duration){
 	episode = result.value("episode").toString();
 
 
-	QString query2  = "insert into `watchhistory` ('showname','season','episode','when') VALUES (\""+showname+"\",\""+season+"\",\""+episode+"\", "+databasehandler::qnow()+")";
+	QString query2  = "insert into `watchhistory` ('showname','season','episode','when') VALUES (\""+showname+"\",\""+season+"\",\""+episode+"\", "+util::qnow()+")";
 	result =databasehandler::execquery(query2, PLAYHISTORY_CONNECTION);
 	this->setWindowTitle(path);
 

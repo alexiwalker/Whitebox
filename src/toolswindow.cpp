@@ -12,6 +12,7 @@
 #include <QGridLayout>
 #include <classes/process/linked_mem_buffer.h>
 #include <classes/ui/tools/reconcile.h>
+#include <classes/ui/tools/replace.h>
 #include <classes/process/settings.h>
 
 /**
@@ -53,6 +54,11 @@ toolsWindow::~toolsWindow()
 }
 
 void toolsWindow::closeEvent (QCloseEvent *event){
+	/**
+	 * Warning: 'event' unreferenced formal parameter:
+	 * As it is overriding an existing function, the blueprint must be the same
+	 * However, this parameter is not required for use at this time, but is available incase it is later
+	**/
 	this->hide();
 }
 
@@ -255,4 +261,13 @@ void toolsWindow::on_show_images_clicked()
 
 	}
 
+}
+
+void toolsWindow::on_replace_clicked()
+{
+	replace* replacewidget = new replace;
+	qDebug() << " hi " << endl;
+
+	ui->tool_window_controls->layout()->addWidget(replacewidget);
+//	replacewidget->show();
 }
