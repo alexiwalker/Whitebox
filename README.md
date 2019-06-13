@@ -16,8 +16,7 @@ existing files are stored in a database and can be played back through the app, 
 
 watch progress is internally tracked, meaning it is easy to seamlessly resume playback of a series with a single click, even if you stopped mid-episode
 
-  ------
-  
+ 
 
 ## Features
 
@@ -33,7 +32,7 @@ Whitebox's feature list is always growing. currently, it supports the following:
 
 * open files directly into the program from your file browser (automatically indexes the file if it is a valid shows, records its information and tracks the watch progress)
 
-  ------
+
   
 ## Build from source and run:
 
