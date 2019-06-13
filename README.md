@@ -15,6 +15,7 @@ is interpreted as:
 existing files are stored in a database and can be played back through the app, where they are organised in an intuitive interface.
 
 watch progress is internally tracked, meaning it is easy to seamlessly resume playback of a series with a single click, even if you stopped mid-episode
+
   ------
   
 
