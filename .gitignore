@@ -1,0 +1,7 @@
+*.db
+*.moc
+*.mkv
+*.obj
+*.qm
+*/debug/*
+*/release/*
