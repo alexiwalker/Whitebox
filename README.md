@@ -15,9 +15,10 @@ is interpreted as:
 existing files are stored in a database and can be played back through the app, where they are organised in an intuitive interface.
 
 watch progress is internally tracked, meaning it is easy to seamlessly resume playback of a series with a single click, even if you stopped mid-episode
+  ------
+  
 
-
-## features
+## Features
 
 Whitebox's feature list is always growing. currently, it supports the following:
 
@@ -31,7 +32,8 @@ Whitebox's feature list is always growing. currently, it supports the following:
 
 * open files directly into the program from your file browser (automatically indexes the file if it is a valid shows, records its information and tracks the watch progress)
 
-
+  ------
+  
 ## Build from source and run:
 
  * Download or clone the repository
@@ -54,8 +56,10 @@ Whitebox's feature list is always growing. currently, it supports the following:
   
   a MSVC 5.13.0 built and deployed as above is included in the repo, in the /windeployqt folder
   
+  ------
   
-  ### in development:
+  
+  ### In development:
   
   * Windows installer file for the program, to properly register it & streamline its use
   
