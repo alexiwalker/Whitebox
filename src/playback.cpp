@@ -98,6 +98,11 @@ playbackWindow::~playbackWindow()
 
 
 void playbackWindow::fire_toggle(bool event){
+	/**
+	 * Warning: 'event' unreferenced formal parameter:
+	 * As it is overriding an existing function, the blueprint must be the same
+	 * However, this parameter is not required for use at this time, but is available incase it is later
+	**/
 	this->playlist_view->toggle();
 }
 

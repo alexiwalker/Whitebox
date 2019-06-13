@@ -1,18 +1,16 @@
 #include "whitebox.h"
 #include "ui_whitebox.h"
+
 #include "settingswindow.h"
 #include "toolswindow.h"
+
 #include <QDirIterator>
 #include <QResizeEvent>
 #include <QScrollArea>
 #include <QPushButton>
-#include <QEventLoop>
 #include <QLabel>
 #include <QScrollBar>
-#include <QSettings>
 #include <QDebug>
-#include <regex>
-#include <chrono>
 #include <QFile>
 #include <QUrl>
 #include <QMessageBox>
@@ -21,6 +19,10 @@
 #include <QFuture>
 #include <QFutureWatcher>
 #include <QtConcurrent/QtConcurrent>
+
+#include <regex>
+#include <chrono>
+
 #include <classes/data/databasehandler.h>
 #include <classes/process/microtimer.h>
 #include <classes/process/linked_mem_buffer.h>
@@ -67,6 +69,11 @@ whiteBox::~whiteBox()
 }
 
 void whiteBox::closeEvent (QCloseEvent *event){
+	/**
+	 * Warning: 'event' unreferenced formal parameter:
+	 * As it is overriding an existing function, the blueprint must be the same
+	 * However, this parameter is not required for use at this time, but is available incase it is later
+	**/
 	delete settingswindow;
 	delete toolswindow;
 	delete playerwindow;
