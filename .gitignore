@@ -5,3 +5,6 @@
 *.qm
 */debug/*
 */release/*
+*.ini
+*.tlog
+*.log
