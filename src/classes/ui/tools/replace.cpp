@@ -3,6 +3,9 @@
 #include <chrono>
 #include <thread>
 #include <classes/process/util.h>
+#include <QFile>
+#include <classes/data/databasehandler.h>
+#include <QSqlQuery>
 
 QString replace::replace_connection = "DATABSE_REPLACE_CONNECTION";
 
@@ -48,3 +51,44 @@ void replace::exec_finished(){
 	execute_button->setEnabled(true);
 	emit execute_finished();
 }
+
+
+bool replace::delete_old_show(QString path){
+	return QFile(path).remove();
+}
+
+
+bool replace::update_database_path(QString oldpath, QString newpath){
+
+	QString query =QString("update shows set path = '%1' where path = '%2'").arg(oldpath,newpath);
+	QSqlQuery result  = databasehandler::execquery(query);
+
+	return (result.lastError().type() == QSqlError::NoError);
+
+}
+
+bool replace::move_new_file(QString frompath, QString topath){
+	return QFile(frompath).rename(topath);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

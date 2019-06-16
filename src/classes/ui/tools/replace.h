@@ -27,7 +27,10 @@ class replace : public QWidget
 			QFutureWatcher<void> exec_watcher;
 			static void async_exec();
 			static QString replace_connection;
-			private slots:
+			bool delete_old_show(QString path);
+			bool update_database_path(QString oldpath, QString newpath);
+			bool move_new_file(QString frompath, QString topath);
+	private slots:
 			void exec();
 			void exec_finished();
 
