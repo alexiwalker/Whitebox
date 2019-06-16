@@ -10,6 +10,7 @@
 #include <QFutureWatcher>
 #include <QLabel>
 #include <vector>
+#include <QListWidget>
 
 class replace : public QWidget
 {
@@ -22,6 +23,14 @@ class replace : public QWidget
 			void create_ui();
 			QPushButton* execute_button;
 			QGridLayout* main_layout;
+			QListWidget* showlist;
+			QListWidget* seasonlist;
+			QListWidget* episodelist;
+			QLabel* selectedepisode;
+
+			QString showname;
+			int seasnum;
+			int epnum;
 
 			QFuture<void> exec_future;
 			QFutureWatcher<void> exec_watcher;
@@ -34,7 +43,10 @@ class replace : public QWidget
 			void exec();
 			void exec_finished();
 
-		signals:
+			void loadseasons(int row);
+			void loadepisodes(int row);
+			void setepisode(int row);
+	signals:
 			void execute_finished();
 
 };

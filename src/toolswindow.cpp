@@ -232,7 +232,7 @@ void toolsWindow::show_rename_run(){
 		qDebug() << "no to show selected" << endl;
 	}
 
-	qDebug() << newname->text() << endl;
+	//qDebug() << newname->text() << endl;
 }
 
 void toolsWindow::on_dbg_clicked()
@@ -266,8 +266,5 @@ void toolsWindow::on_show_images_clicked()
 void toolsWindow::on_replace_clicked()
 {
 	replace* replacewidget = new replace;
-	qDebug() << " hi " << endl;
-
 	ui->tool_window_controls->layout()->addWidget(replacewidget);
-//	replacewidget->show();
 }
