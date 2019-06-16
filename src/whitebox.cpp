@@ -352,7 +352,6 @@ void whiteBox::show_play_resume(){
 
 	playerwindow->playlist->clear();
 	QString query = "select * from watchhistory where `showname`='"+showname+"' order by `when` desc limit 1";
-
 	QSqlQuery result = databasehandler::execquery(query);
 	QString season,episode,sname;
 	if (result.isValid()){
@@ -374,8 +373,7 @@ void whiteBox::show_play_resume(){
 		} while (result.next());
 	}
 
-
-	QString query3 = "select * from `shows` where `showname` = '"+showname+"' order by season asc, episode asc";
+	QString query3 = "select * from `shows` where `showname` = '"+showname+"' order by season desc, episode desc";
 	result = databasehandler::execquery(query3);
 
 	if(result.isValid()){
