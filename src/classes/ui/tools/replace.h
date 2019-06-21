@@ -11,6 +11,7 @@
 #include <QLabel>
 #include <vector>
 #include <QListWidget>
+#include <classes/process/util.h>
 
 class replace : public QWidget
 {
@@ -27,26 +28,33 @@ class replace : public QWidget
 			QListWidget* seasonlist;
 			QListWidget* episodelist;
 			QLabel* selectedepisode;
-
+			QPushButton* openfilechoose;
+			QLabel* selectedfile;
+			QString selectedfilestring;
+			QString selectedfilestring2;
 			QString showname;
 			int seasnum;
 			int epnum;
 
-			QFuture<void> exec_future;
-			QFutureWatcher<void> exec_watcher;
-			static void async_exec();
+			QFuture<util::success_message*> exec_future;
+			QFutureWatcher<util::success_message*> exec_watcher;
+			static util::success_message* async_exec(QString oldpath, QString newpath);
 			static QString replace_connection;
-			bool delete_old_show(QString path);
-			bool update_database_path(QString oldpath, QString newpath);
-			bool move_new_file(QString frompath, QString topath);
-	private slots:
+			static bool delete_old_show(QString path);
+			static bool update_database_path(QString oldpath, QString newpath);
+			static bool move_new_file(QString frompath, QString topath);
+
+			void reset_ui();
+
+		private slots:
 			void exec();
 			void exec_finished();
 
 			void loadseasons(int row);
 			void loadepisodes(int row);
 			void setepisode(int row);
-	signals:
+			void choosefile();
+		signals:
 			void execute_finished();
 
 };

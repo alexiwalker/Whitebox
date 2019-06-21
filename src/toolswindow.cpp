@@ -14,6 +14,7 @@
 #include <classes/ui/tools/reconcile.h>
 #include <classes/ui/tools/replace.h>
 #include <classes/process/settings.h>
+#include <classes/process/util.h>
 
 /**
  * The Tools Window class should provided links to associated standalone programs that provide utility functions.
@@ -26,10 +27,10 @@
  */
 
 /**
+ *
  * todo: add merge shows (eg, move all 'arrow' shows into 'Arrow', 'mythbusters' into 'Mythbusters', etc)
  * todo: rename show
  * todo: find potential duplicates ('arrow' vs 'Arrow' etc.)
- *
  *
  */
 
@@ -43,8 +44,6 @@ toolsWindow::toolsWindow(QWidget *parent) :
 	library = settings::load_setting("library","");
 	source = settings::load_setting("source", "");
 	connect(&build_index_watcher, SIGNAL(finished()), this, SLOT(build_index_finished()));
-
-
 	connect(&show_rename_watcher, SIGNAL(finished()), this, SLOT(show_rename_finished()));
 }
 
@@ -121,12 +120,10 @@ bool toolsWindow::async_index(QString location,QString location2)
 
 			if (whiteBox::extract_episode_details(fileinfo.absoluteFilePath(), showname, season, episode)) {
 
-
 				QSqlQuery renames = databasehandler::execquery ("select * from `auto_rename` where `from` = '"+showname+"'", LIBRARY_INDEX_CONNECTION);
 				if(renames.isValid ()){
 					showname = renames.value("to").toString ();
 				}
-
 
 				object["path"] = fileinfo.absoluteFilePath();
 				object["lastwatch"] = NULL;
@@ -200,7 +197,6 @@ void toolsWindow::show_rename(){
 	ui->tool_window_controls->layout()->addWidget(tolabel);
 	ui->tool_window_controls->layout()->addWidget(showlistto);
 
-
 	ui->tool_window_controls->layout()->addWidget(customtolabel);
 	ui->tool_window_controls->layout()->addWidget(newname);
 	ui->tool_window_controls->layout()->addWidget(startrename);
@@ -237,6 +233,7 @@ void toolsWindow::show_rename_run(){
 
 void toolsWindow::on_dbg_clicked()
 {
+	util::clearLayout(ui->tool_window_controls->layout());
 	reconcile* reconcilewidget = new reconcile;
 
 	ui->tool_window_controls->layout()->addWidget(reconcilewidget);
@@ -265,6 +262,7 @@ void toolsWindow::on_show_images_clicked()
 
 void toolsWindow::on_replace_clicked()
 {
+	util::clearLayout(ui->tool_window_controls->layout());
 	replace* replacewidget = new replace;
 	ui->tool_window_controls->layout()->addWidget(replacewidget);
 }

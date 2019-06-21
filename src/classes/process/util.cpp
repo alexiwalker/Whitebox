@@ -3,6 +3,8 @@
 #include <chrono>
 #include <QString>
 #include <QStringList>
+#include <QGridLayout>
+#include <QWidget>
 
 void util::sleep(int duration)
 {
@@ -31,4 +33,16 @@ QString util::qnow(){
 	QString qnow = QString::number(now);
 
 	return qnow;
+}
+
+void util::clearLayout(QLayout* layout){
+	if ( layout != nullptr )
+	{
+		QLayoutItem* item;
+		while ( ( item = layout->takeAt( 0 ) ) != nullptr )
+		{
+			delete item->widget();
+			delete item;
+		}
+	}
 }
