@@ -85,12 +85,13 @@ void replace::create_ui(){
 
 void replace::exec(){
 
+	util::notification("hi");
+
+
 	if (selectedfilestring == "" || selectedfilestring2 == ""){
 		QString message = "Please select an episode to replace and a file to replace it with";
-		QMessageBox::critical(
-					nullptr,
-					tr("WhiteBox"),
-					tr(message.toStdString().c_str()));
+
+		util::alert(message);
 		return;
 	}
 
@@ -118,9 +119,16 @@ util::success_message* replace::async_exec(QString newpath,QString oldpath ){
 }
 
 void replace::exec_finished(){
-	qDebug() << exec_future.result()->message << endl;
+	util::success_message* res = exec_future.result();
+
+	if(res->result)
+		util::notification("File successfully replaced");
+	else
+		util::alert("File replacement failed: " + res->message);
+
 	execute_button->setEnabled(true);
 	reset_ui();
+	delete res;
 	emit execute_finished();
 }
 

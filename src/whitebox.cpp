@@ -117,9 +117,10 @@ void whiteBox::set_file_open_handle(QString file){
 	if(!mediafile.exists() || (filedata.suffix() != "mkv" && filedata.suffix() != "mp4" && filedata.suffix() != "mov" && filedata.suffix() != "avi")){
 		QString message = path + " not found. Episode could not be added.";
 		QMessageBox::critical(
-		this,
-		tr("WhiteBox"),
-		tr(message.toStdString().c_str()));
+			this,
+			tr("WhiteBox"),
+			tr(message.toStdString().c_str())
+		);
 		return;
 	}
 
@@ -195,9 +196,10 @@ void whiteBox::episode_play(){
 	if(!mediafile.exists()){
 		QString message = path + " not found. Episode could not be played.";
 		QMessageBox::critical(
-		this,
-		tr("WhiteBox"),
-		tr(message.toStdString().c_str()));
+			this,
+			tr("WhiteBox"),
+			tr(message.toStdString().c_str())
+		);
 		return;
 	}
 
@@ -227,9 +229,10 @@ void whiteBox::playlist_add(){
 	if(!mediafile.exists()){
 		QString message = path + " not found. Episode could not be added.";
 		QMessageBox::critical(
-		this,
-		tr("WhiteBox"),
-		tr(message.toStdString().c_str()));
+			this,
+			tr("WhiteBox"),
+			tr(message.toStdString().c_str())
+		);
 		return;
 	}
 

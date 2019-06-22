@@ -88,7 +88,7 @@ bool toolsWindow::async_index(QString location,QString location2)
 {
 	/**
 	 * @brief prototype : build library db from found files
-	 * @return void, resulting data accessed through data.db
+	 * @return void, resulting data accessed through data.db (databasehandler::defaultDB)
 	 * this should probably be a tools/tool.exe to run async to main program
 	 */
 

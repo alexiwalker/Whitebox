@@ -7,11 +7,13 @@
 #include <QFileInfo>
 #include <QSqlQuery>
 
+QString databasehandler::defaultDB = "data.db";
 databasehandler::databasehandler(QString name)
 {
 
 
 }
+
 
 databasehandler::~databasehandler(){
 }
@@ -51,7 +53,7 @@ void databasehandler::updatedata(QString table, QJsonObject values, QString conn
 QString databasehandler::querydata(QString query, QString column, QString connection){
 	QSqlDatabase::removeDatabase(connection);
 	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE",connection);
-	db.setDatabaseName("data.db");
+	db.setDatabaseName(databasehandler::defaultDB);
 	QString qresult = "";
 	if(db.open()){
 		QSqlQuery result = db.exec(query);
@@ -70,7 +72,7 @@ QSqlQuery databasehandler::execquery(QString query, QString connection){
 
 	QSqlDatabase::removeDatabase(connection);
 	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE",connection);
-	db.setDatabaseName("data.db");
+	db.setDatabaseName(databasehandler::defaultDB);
 
 	if(db.open()){
 		QSqlQuery result = db.exec(query);
@@ -85,7 +87,7 @@ QSqlQuery databasehandler::execquery(QString query, QString connection){
 void databasehandler::initdb(){
 	QSqlDatabase::removeDatabase(DB_STANDARD_CONNECTION);
 	QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE",DB_STANDARD_CONNECTION);
-	db.setDatabaseName("data.db");
+	db.setDatabaseName(databasehandler::defaultDB);
 	if(db.open()){
 
 		db.exec(" CREATE TABLE IF NOT EXISTS `shows` (\

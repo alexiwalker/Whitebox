@@ -5,6 +5,7 @@
 #include <QStringList>
 #include <QGridLayout>
 #include <QWidget>
+#include <QMessageBox>
 
 void util::sleep(int duration)
 {
@@ -45,4 +46,24 @@ void util::clearLayout(QLayout* layout){
 			delete item;
 		}
 	}
+}
+
+
+
+void util::alert(QString message)
+{
+	QMessageBox::critical(
+				nullptr,
+				"WhiteBox",
+				message.toStdString().c_str()
+				);
+}
+
+void util::notification(QString message)
+{
+	QMessageBox::information(
+				nullptr,
+				"WhiteBox",
+				message.toStdString().c_str()
+				);
 }

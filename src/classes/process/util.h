@@ -28,6 +28,9 @@ namespace  util
 			}
 	};
 
+	void alert(QString message);
+	void notification(QString message);
+
 };
 
 #endif // UTIL_H
