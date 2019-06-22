@@ -82,8 +82,8 @@ playbackWindow::playbackWindow(QWidget *parent) :
 
 	connect(controls->listtogglebutton,SIGNAL(clicked(bool)),this,SLOT(fire_toggle(bool)));
 
-
-	//	ui->playerlayout->addWidget(player_controls);
+//currently disabled, because controls never respond properly when in the same window as the player?
+//		ui->playerlayout->addWidget(player_controls);
 	player_controls->show();
 }
 
@@ -197,12 +197,6 @@ void playbackWindow::external_url_add(QString path){
 
 
 	player_url_play(path);
-//	playlist->addMedia(QUrl::fromLocalFile(path));
-
-//	if(player->state()== QMediaPlayer::StoppedState)
-//		player->play();
-
-	qDebug() << player->state() << endl;
 }
 
 
@@ -217,6 +211,7 @@ void playbackWindow::player_stop(){
 
 void playbackWindow::player_seek(int location){
 	player->setPosition(location);
+	player_controls->repaint();
 }
 
 

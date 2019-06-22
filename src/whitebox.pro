@@ -42,7 +42,10 @@ SOURCES += \
     toolswindow.cpp \
     whitebox.cpp \
     classes/ui/tools/replace.cpp \
-    classes/process/util.cpp
+    classes/process/util.cpp \
+    classes/ui/tools/replace_folder.cpp \
+    classes/ui/tools/rename.cpp \
+    classes/ui/tools/locate.cpp
 
 HEADERS += \
 	classes/data/databasehandler.h \
@@ -61,7 +64,10 @@ HEADERS += \
     toolswindow.h \
     whitebox.h \
     classes/ui/tools/replace.h \
-    classes/process/util.h
+    classes/process/util.h \
+    classes/ui/tools/replace_folder.h \
+    classes/ui/tools/rename.h \
+    classes/ui/tools/locate.h
 
 FORMS += \
     playback.ui \
